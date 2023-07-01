@@ -1,8 +1,16 @@
 from fastapi import FastAPI
+from pydantic import BaseModel
 
 app = FastAPI()
 
 
-@app.get("/users/{id}")
-async def root(id: int, name: str, place: str):
-    return {"message": id, "name": name, "place": place}
+class User(BaseModel):
+    first_name: str
+    last_name: str
+    age: int
+    salary: float
+
+
+@app.post("/users")
+async def root(user: User):
+    return {"name": user}
