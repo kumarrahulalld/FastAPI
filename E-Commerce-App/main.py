@@ -359,7 +359,7 @@ async def update_order(orderId: str, order: OrderUpdateDTO):
 
 @app.get("/orders")
 async def get_all_orders():
-    fetchedOrders = await orders_collection.find({})
+    fetchedOrders = await orders_collection.find({}).to_list(1000)
     if fetchedOrders is not None:
         return fetchedOrders
     else:
@@ -389,7 +389,7 @@ async def delete_order(orderId: str):
 async def get_all_orders_for_user(userId: str):
     fetchedUser = users_collection.find_one({"_id": ObjectId(userId), "status": "Active"})
     if fetchedUser is not None:
-        fetchedOrders = await orders_collection.find({"user_id": userId})
+        fetchedOrders = await orders_collection.find({"user_id": userId}).to_list(1000)
         if fetchedOrders is not None:
             return fetchedOrders
         else:
