@@ -8,7 +8,6 @@ import pydantic
 from typing import List
 from bson import ObjectId
 pydantic.json.ENCODERS_BY_TYPE[ObjectId] = str
-
 router = APIRouter(
     prefix="",
     tags=["products"], )
