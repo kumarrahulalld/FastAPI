@@ -18,6 +18,8 @@ router = APIRouter(
 
 @router.get("/{userId}", status_code=status.HTTP_200_OK)
 async def get_user_by_id(userId: str):
+    if not ObjectId.is_valid(userId):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST , f'Provided User Id {userId} Is not a valid Object ID.')
     cacheduser = r.hget(f'users', f'{userId}')
     if cacheduser is not None:
         return json_util.loads(cacheduser)
@@ -53,6 +55,8 @@ async def get_all_users():
 
 @router.put("/{userId}", status_code=status.HTTP_200_OK)
 async def update_user_by_id(userId: str, user: UserUpdateDTO):
+    if not ObjectId.is_valid(userId):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST , f'Provided User Id {userId} Is not a valid Object ID.')
     user = jsonable_encoder(user)
     isUserValid = await users_collection.find_one({"_id": ObjectId(userId), "status": "Active"})
     if isUserValid:
@@ -71,6 +75,8 @@ async def update_user_by_id(userId: str, user: UserUpdateDTO):
 
 @router.delete("/{userId}", status_code=status.HTTP_200_OK)
 async def delete_user_by_id(userId: str):
+    if not ObjectId.is_valid(userId):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST , f'Provided User Id {userId} Is not a valid Object ID.')
     isUserValid = await users_collection.find_one({"_id": ObjectId(userId)}, {"status": "Active"})
     if isUserValid:
         deleted_user = await users_collection.update_one({"_id": ObjectId(userId)}, {"$set": {"status": "Deactivate"}})
@@ -104,11 +110,15 @@ async def create_user(user: UserCreateDTO):
 
 @router.post("/{userId}/addItemToBucket", status_code=status.HTTP_201_CREATED)
 async def add_item_to_bucket(userId: str, item: BucketItem):
+    if not ObjectId.is_valid(userId):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST , f'Provided User Id {userId} Is not a valid Object ID.')
     item = jsonable_encoder(item)
     quantity = item["quantity"]
     product_id = item["product_id"]
     fetchedUser = await users_collection.find_one({"_id": ObjectId(userId), "status": "Active"})
     if fetchedUser is not None:
+        if not ObjectId.is_valid(item["product_id"]):
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, f'Provided product Id {item["product_id"]} Is not a valid Object ID.')
         fetchedProduct = await products_collection.find_one({"_id": ObjectId(item["product_id"]), "status": "Active"})
         if fetchedProduct is not None:
             if fetchedProduct["quantity"] >= item["quantity"]:
@@ -132,11 +142,16 @@ async def add_item_to_bucket(userId: str, item: BucketItem):
 
 @router.put("/{userId}/updateItemToBucket", status_code=status.HTTP_200_OK)
 async def update_item_to_bucket(userId: str, item: BucketItem):
+    if not ObjectId.is_valid(userId):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST , f'Provided User Id {userId} Is not a valid Object ID.')
     item = jsonable_encoder(item)
     quantity = item["quantity"]
     product_id = item["product_id"]
     fetchedUser = await users_collection.find_one({"_id": ObjectId(userId), "status": "Active"})
     if fetchedUser is not None:
+        if not ObjectId.is_valid(item["product_id"]):
+            raise HTTPException(status.HTTP_400_BAD_REQUEST,
+                                f'Provided product Id {item["product_id"]} Is not a valid Object ID.')
         fetchedProduct = await products_collection.find_one({"_id": ObjectId(item["product_id"]), "status": "Active"})
         if fetchedProduct is not None:
             if fetchedProduct["quantity"] >= item["quantity"]:
@@ -161,6 +176,10 @@ async def update_item_to_bucket(userId: str, item: BucketItem):
 
 @router.delete("/{userId}/deleteItemFromBucket", status_code=status.HTTP_200_OK)
 async def delete_item_to_bucket(userId: str, productId: str):
+    if not ObjectId.is_valid(userId):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, f'Provided User Id {userId} Is not a valid Object ID.')
+    if not ObjectId.is_valid(productId):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, f'Provided Product Id {productId} Is not a valid Object ID.')
     fetchedUser = await users_collection.find_one({"_id": ObjectId(userId), "status": "Active"})
     if fetchedUser is not None:
         for bucketItem in fetchedUser["bucket"]:
@@ -178,6 +197,8 @@ async def delete_item_to_bucket(userId: str, productId: str):
 
 @router.delete("/{userId}/deleteBucket", status_code=status.HTTP_200_OK)
 async def delete_bucket(userId: str):
+    if not ObjectId.is_valid(userId):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, f'Provided User Id {userId} Is not a valid Object ID.')
     fetchedUser = await users_collection.find_one({"_id": ObjectId(userId), "status": "Active"})
     if fetchedUser is not None:
         if len(fetchedUser["bucket"]) != 0:
@@ -195,6 +216,8 @@ async def delete_bucket(userId: str):
 @router.get("/"
             "users/{userId}/getBucket", status_code=status.HTTP_200_OK)
 async def get_bucket(userId: str):
+    if not ObjectId.is_valid(userId):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, f'Provided User Id {userId} Is not a valid Object ID.')
     userBucket = r.get(f'user:{userId}:bucket')
     if userBucket is not None:
         return json_util.loads(userBucket)
@@ -281,6 +304,8 @@ async def get_bucket(userId: str):
 
 @router.post("/{userId}/createOrder", status_code=status.HTTP_201_CREATED)
 async def create_order(userId: str, address: Address, modeOfPayment: str, transactionId: str):
+    if not ObjectId.is_valid(userId):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, f'Provided User Id {userId} Is not a valid Object ID.')
     fetchedUser = await users_collection.find_one({"_id": ObjectId(userId), "status": "Active"})
     if fetchedUser is not None:
         if len(fetchedUser["bucket"]) != 0:
@@ -323,6 +348,8 @@ async def create_order(userId: str, address: Address, modeOfPayment: str, transa
 
 @router.get("users/{userId}/getAllOrders", status_code=status.HTTP_200_OK)
 async def get_all_orders_for_user(userId: str):
+    if not ObjectId.is_valid(userId):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, f'Provided User Id {userId} Is not a valid Object ID.')
     userorders = r.hgetall(f'user:{userId}:orders')
     if len(userorders) !=0:
         orderlist = list()

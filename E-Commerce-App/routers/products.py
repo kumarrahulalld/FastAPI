@@ -18,6 +18,8 @@ router = APIRouter(
 
 @router.get("/{productId}", status_code=status.HTTP_200_OK)
 async def get_product_by_id(productId: str):
+    if not ObjectId.is_valid(productId):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, f'Provided Product Id {productId} Is not a valid Object ID.')
     cachedproduct = r.hget('products', f'{productId}')
     if cachedproduct is not None:
         return json_util.loads(cachedproduct)
@@ -52,6 +54,8 @@ async def get_all_products():
 
 @router.put("/{productId}", status_code=status.HTTP_200_OK)
 async def update_product_by_id(productId: str, product: ProductUpdateDTO):
+    if not ObjectId.is_valid(productId):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, f'Provided Product Id {productId} Is not a valid Object ID.')
     product = jsonable_encoder(product)
     isproductValid = await products_collection.find_one({"_id": ObjectId(productId), "status": "Active"})
     if isproductValid:
@@ -69,6 +73,8 @@ async def update_product_by_id(productId: str, product: ProductUpdateDTO):
 
 @router.delete("/{productId}", status_code=status.HTTP_200_OK)
 async def delete_product_by_id(productId: str):
+    if not ObjectId.is_valid(productId):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, f'Provided Product Id {productId} Is not a valid Object ID.')
     isproductValid = await products_collection.find_one({"_id": ObjectId(productId), "status": "Active"})
     if isproductValid:
         deleted_product = await products_collection.update_one({"_id": ObjectId(productId)},

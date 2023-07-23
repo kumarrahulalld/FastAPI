@@ -17,6 +17,8 @@ router = APIRouter(
 
 @router.put("/{orderId}", status_code=status.HTTP_200_OK)
 async def update_order(orderId: str, order: OrderUpdateDTO):
+    if not ObjectId.is_valid(orderId):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST , f'Provided Order {orderId} Id Is not a valid Object ID.')
     order = jsonable_encoder(order)
     fetchedOrder = await orders_collection.find_one({"_id": ObjectId(orderId)})
     if fetchedOrder is not None:
@@ -48,8 +50,11 @@ async def get_all_orders():
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"No Orders exists .")
 
 
+
 @router.get("/{orderId}", status_code= status.HTTP_200_OK)
 async def get_order_by_id(orderId: str):
+    if not ObjectId.is_valid(orderId):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST , f'Provided Order {orderId} Id Is not a valid Object ID.')
     cachedorder = r.hget('orders', f'{orderId}')
     if cachedorder is not None:
         return json.loads(cachedorder)
@@ -64,6 +69,8 @@ async def get_order_by_id(orderId: str):
 
 @router.delete("/{orderId}", status_code= status.HTTP_200_OK)
 async def delete_order(orderId: str):
+    if not ObjectId.is_valid(orderId):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST , f'Provided Order {orderId} Id Is not a valid Object ID.')
     fetchedOrder = await orders_collection.find_one({"_id": ObjectId(orderId)})
     if fetchedOrder is not None:
         orders_collection.delete_one({"_id": ObjectId(orderId)})
