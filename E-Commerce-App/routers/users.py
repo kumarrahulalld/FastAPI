@@ -12,11 +12,11 @@ import redis
 r = redis.Redis(host='127.0.0.1', port=6379, decode_responses=True)
 pydantic.json.ENCODERS_BY_TYPE[ObjectId] = str
 router = APIRouter(
-    prefix="",
+    prefix="/users",
     tags=["users"], )
 
 
-@router.get("/users/{userId}", status_code=status.HTTP_200_OK)
+@router.get("/{userId}", status_code=status.HTTP_200_OK)
 async def get_user_by_id(userId: str):
     cacheduser = r.hget(f'users', f'{userId}')
     if cacheduser is not None:
@@ -32,7 +32,7 @@ async def get_user_by_id(userId: str):
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"No User exists with User Id {userId}.")
 
 
-@router.get("/users", status_code= status.HTTP_200_OK)
+@router.get("", status_code= status.HTTP_200_OK)
 async def get_all_users():
     cachedusers = r.hgetall('users')
     if len(cachedusers) !=0:
@@ -51,7 +51,7 @@ async def get_all_users():
         return users
 
 
-@router.put("/users/{userId}", status_code=status.HTTP_200_OK)
+@router.put("/{userId}", status_code=status.HTTP_200_OK)
 async def update_user_by_id(userId: str, user: UserUpdateDTO):
     user = jsonable_encoder(user)
     isUserValid = await users_collection.find_one({"_id": ObjectId(userId), "status": "Active"})
@@ -69,7 +69,7 @@ async def update_user_by_id(userId: str, user: UserUpdateDTO):
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"No User exists with User Id {userId}.")
 
 
-@router.delete("/users/{userId}", status_code=status.HTTP_200_OK)
+@router.delete("/{userId}", status_code=status.HTTP_200_OK)
 async def delete_user_by_id(userId: str):
     isUserValid = await users_collection.find_one({"_id": ObjectId(userId)}, {"status": "Active"})
     if isUserValid:
@@ -81,7 +81,7 @@ async def delete_user_by_id(userId: str):
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"No User exists with User Id {userId}.")
 
 
-@router.post("/users", status_code=status.HTTP_201_CREATED)
+@router.post("", status_code=status.HTTP_201_CREATED)
 async def create_user(user: UserCreateDTO):
     user = jsonable_encoder(user)
     is_email_used = await users_collection.find_one({"email": user["email"]})
@@ -102,7 +102,7 @@ async def create_user(user: UserCreateDTO):
         return {'detail': 'Email Already In Use. Please use Different Email.'}
 
 
-@router.post("/users/{userId}/addItemToBucket", status_code=status.HTTP_201_CREATED)
+@router.post("/{userId}/addItemToBucket", status_code=status.HTTP_201_CREATED)
 async def add_item_to_bucket(userId: str, item: BucketItem):
     item = jsonable_encoder(item)
     quantity = item["quantity"]
@@ -130,7 +130,7 @@ async def add_item_to_bucket(userId: str, item: BucketItem):
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"No User exists with User Id {userId}.")
 
 
-@router.put("/users/{userId}/updateItemToBucket", status_code=status.HTTP_200_OK)
+@router.put("/{userId}/updateItemToBucket", status_code=status.HTTP_200_OK)
 async def update_item_to_bucket(userId: str, item: BucketItem):
     item = jsonable_encoder(item)
     quantity = item["quantity"]
@@ -159,7 +159,7 @@ async def update_item_to_bucket(userId: str, item: BucketItem):
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"No User exists with User Id {userId}.")
 
 
-@router.delete("/users/{userId}/deleteItemFromBucket", status_code=status.HTTP_200_OK)
+@router.delete("/{userId}/deleteItemFromBucket", status_code=status.HTTP_200_OK)
 async def delete_item_to_bucket(userId: str, productId: str):
     fetchedUser = await users_collection.find_one({"_id": ObjectId(userId), "status": "Active"})
     if fetchedUser is not None:
@@ -176,7 +176,7 @@ async def delete_item_to_bucket(userId: str, productId: str):
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"No User exists with User Id {userId}.")
 
 
-@router.delete("/users/{userId}/deleteBucket", status_code=status.HTTP_200_OK)
+@router.delete("/{userId}/deleteBucket", status_code=status.HTTP_200_OK)
 async def delete_bucket(userId: str):
     fetchedUser = await users_collection.find_one({"_id": ObjectId(userId), "status": "Active"})
     if fetchedUser is not None:
@@ -279,7 +279,7 @@ async def get_bucket(userId: str):
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"No User exists with User Id {userId}.")
 
 
-@router.post("/users/{userId}/createOrder", status_code=status.HTTP_201_CREATED)
+@router.post("/{userId}/createOrder", status_code=status.HTTP_201_CREATED)
 async def create_order(userId: str, address: Address, modeOfPayment: str, transactionId: str):
     fetchedUser = await users_collection.find_one({"_id": ObjectId(userId), "status": "Active"})
     if fetchedUser is not None:
@@ -321,7 +321,7 @@ async def create_order(userId: str, address: Address, modeOfPayment: str, transa
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"No User exists with User Id {userId}.")
 
 
-@router.get("/userId/{userId}/getAllOrders", status_code=status.HTTP_200_OK)
+@router.get("users/{userId}/getAllOrders", status_code=status.HTTP_200_OK)
 async def get_all_orders_for_user(userId: str):
     userorders = r.hgetall(f'user:{userId}:orders')
     if len(userorders) !=0:

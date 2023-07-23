@@ -12,11 +12,11 @@ import redis
 r = redis.Redis(host='127.0.0.1', port=6379, decode_responses=True)
 pydantic.json.ENCODERS_BY_TYPE[ObjectId] = str
 router = APIRouter(
-    prefix="",
+    prefix="/products",
     tags=["products"], )
 
 
-@router.get("/products/{productId}", status_code=status.HTTP_200_OK)
+@router.get("/{productId}", status_code=status.HTTP_200_OK)
 async def get_product_by_id(productId: str):
     cachedproduct = r.hget('products', f'{productId}')
     if cachedproduct is not None:
@@ -31,7 +31,7 @@ async def get_product_by_id(productId: str):
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"No product exists with product Id {productId}.")
 
 
-@router.get("/products", status_code=status.HTTP_200_OK)
+@router.get("", status_code=status.HTTP_200_OK)
 async def get_all_products():
     cachedproducts = r.hgetall('products')
     if len(cachedproducts) != 0:
@@ -50,7 +50,7 @@ async def get_all_products():
         return products
 
 
-@router.put("/products/{productId}", status_code=status.HTTP_200_OK)
+@router.put("/{productId}", status_code=status.HTTP_200_OK)
 async def update_product_by_id(productId: str, product: ProductUpdateDTO):
     product = jsonable_encoder(product)
     isproductValid = await products_collection.find_one({"_id": ObjectId(productId), "status": "Active"})
@@ -67,7 +67,7 @@ async def update_product_by_id(productId: str, product: ProductUpdateDTO):
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"No product exists with product Id {productId}.")
 
 
-@router.delete("/products/{productId}", status_code=status.HTTP_200_OK)
+@router.delete("/{productId}", status_code=status.HTTP_200_OK)
 async def delete_product_by_id(productId: str):
     isproductValid = await products_collection.find_one({"_id": ObjectId(productId), "status": "Active"})
     if isproductValid:
@@ -80,7 +80,7 @@ async def delete_product_by_id(productId: str):
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"No product exists with product Id {productId}.")
 
 
-@router.post("/products", status_code=status.HTTP_201_CREATED)
+@router.post("", status_code=status.HTTP_201_CREATED)
 async def create_product(product: ProductCreateDTO):
     product = jsonable_encoder(product)
     is_product_id_used = await products_collection.find_one({"email": product["productID"]})
