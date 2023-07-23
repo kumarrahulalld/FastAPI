@@ -16,7 +16,7 @@ router = APIRouter(
     tags=["products"], )
 
 
-@router.get("/products/{productId}", response_model=ProductCreateDTO, status_code=status.HTTP_200_OK)
+@router.get("/products/{productId}", status_code=status.HTTP_200_OK)
 async def get_product_by_id(productId: str):
     cachedproduct = r.hget('products', f'{productId}')
     if cachedproduct is not None:
@@ -31,13 +31,14 @@ async def get_product_by_id(productId: str):
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"No product exists with product Id {productId}.")
 
 
-@router.get("/products", response_model=List[ProductCreateDTO], status_code=status.HTTP_200_OK)
+@router.get("/products", status_code=status.HTTP_200_OK)
 async def get_all_products():
     cachedproducts = r.hgetall('products')
     if len(cachedproducts) != 0:
         productlist =list()
         for key in cachedproducts.keys():
             productlist.append(json_util.loads(cachedproducts.get(key)))
+        print(productlist)
         return productlist
     products = await products_collection.find({"status": "Active"}, {"status": 0, "created_at": 0}).to_list(1000)
     if products is None:
@@ -49,7 +50,7 @@ async def get_all_products():
         return products
 
 
-@router.put("/products/{productId}", response_model=ProductUpdateDTO, status_code=status.HTTP_200_OK)
+@router.put("/products/{productId}", status_code=status.HTTP_200_OK)
 async def update_product_by_id(productId: str, product: ProductUpdateDTO):
     product = jsonable_encoder(product)
     isproductValid = await products_collection.find_one({"_id": ObjectId(productId), "status": "Active"})

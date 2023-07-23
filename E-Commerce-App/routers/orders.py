@@ -15,7 +15,7 @@ router = APIRouter(
     tags=["orders"], )
 
 
-@router.put("/orders/{orderId}")
+@router.put("/orders/{orderId}", status_code=status.HTTP_200_OK)
 async def update_order(orderId: str, order: OrderUpdateDTO):
     order = jsonable_encoder(order)
     fetchedOrder = await orders_collection.find_one({"_id": ObjectId(orderId)})
@@ -30,7 +30,7 @@ async def update_order(orderId: str, order: OrderUpdateDTO):
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"No Order exists with Order Id {orderId}.")
 
 
-@router.get("/orders")
+@router.get("/orders", status_code=status.HTTP_200_OK)
 async def get_all_orders():
     cachedorders = r.hgetall('orders')
     if len(cachedorders) !=0:
@@ -48,7 +48,7 @@ async def get_all_orders():
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"No Orders exists .")
 
 
-@router.get("/orders/{orderId}")
+@router.get("/orders/{orderId}", status_code= status.HTTP_200_OK)
 async def get_order_by_id(orderId: str):
     cachedorder = r.hget('orders', f'{orderId}')
     if cachedorder is not None:
@@ -62,7 +62,7 @@ async def get_order_by_id(orderId: str):
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"No Order exists with Order ID {orderId} .")
 
 
-@router.delete("/orders/{orderId}")
+@router.delete("/orders/{orderId}", status_code= status.HTTP_200_OK)
 async def delete_order(orderId: str):
     fetchedOrder = await orders_collection.find_one({"_id": ObjectId(orderId)})
     if fetchedOrder is not None:
