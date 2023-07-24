@@ -14,7 +14,7 @@ def publish(cameraId, topicName):
     width = int(video.get(3) / 2)
 
     # Open a Redis connection to be used as publisher
-    server = redis.Redis()
+    server = redis.Redis(host='127.0.0.1', port=6379)
 
     # While video camera is on...
     while video.isOpened():

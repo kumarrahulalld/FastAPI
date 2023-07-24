@@ -7,7 +7,7 @@ import numpy as np
 
 
 def subscribe(topic, userId):
-    client = redis.Redis()
+    client = redis.Redis(host='127.0.0.1', port=6379)
     print(topic, userId)
     client_channel = client.pubsub()
     # Let's subscribe to other user's channel.
