@@ -101,3 +101,4 @@ async def create_product(product: ProductCreateDTO):
         return created_product
     else:
         return {'detail': 'Product Id Already In Use. Please use Different Product ID.'}
+    
