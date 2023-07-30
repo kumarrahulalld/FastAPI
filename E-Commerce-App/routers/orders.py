@@ -1,15 +1,15 @@
 import json
 
 from fastapi import APIRouter
-from models import OrderUpdateDTO
-from database import users_collection, orders_collection
+from ..models import OrderUpdateDTO
+from ..database import users_collection, orders_collection
 from fastapi import HTTPException, status
 from fastapi.encoders import jsonable_encoder
 import pydantic
 from bson import ObjectId, json_util
 pydantic.json.ENCODERS_BY_TYPE[ObjectId] = str
 import redis
-r = redis.Redis(host='127.0.0.1', port=6379, decode_responses=True)
+r = redis.from_url('redis://redis:6379', decode_responses=True)
 router = APIRouter(
     prefix="/orders",
     tags=["orders"], )

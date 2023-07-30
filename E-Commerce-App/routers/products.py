@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from models import ProductCreateDTO, ProductUpdateDTO
-from database import products_collection
+from ..models import ProductCreateDTO, ProductUpdateDTO
+from ..database import products_collection
 from fastapi import HTTPException, status
 from fastapi.encoders import jsonable_encoder
 import datetime
@@ -9,7 +9,7 @@ from typing import List
 from bson import ObjectId, json_util
 
 import redis
-r = redis.Redis(host='127.0.0.1', port=6379, decode_responses=True)
+r = redis.from_url('redis://redis:6379', decode_responses=True)
 pydantic.json.ENCODERS_BY_TYPE[ObjectId] = str
 router = APIRouter(
     prefix="/products",

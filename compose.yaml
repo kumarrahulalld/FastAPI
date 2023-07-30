@@ -1,0 +1,24 @@
+services:
+   redis: 
+     image: redislabs/redismod
+     ports:
+       - '6379:6379' 
+     networks:
+       - ecom
+   web:
+        build: ./E-Commerce-App
+        ports:
+            - "8000:80"
+        networks:
+            - ecom
+        depends_on:
+            - redis
+   mongo:
+        image: mongo
+        ports:
+        -  '27017:27017'
+        networks:
+        -  ecom
+
+networks:
+  ecom:
