@@ -6,7 +6,7 @@ services:
      networks:
        - ecom
    web:
-        build: ./E-Commerce-App
+        image: backendmentorship-web
         ports:
             - "8000:80"
         networks:
