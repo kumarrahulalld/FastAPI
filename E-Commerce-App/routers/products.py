@@ -9,7 +9,7 @@ from typing import List
 from bson import ObjectId, json_util
 
 import redis
-r = redis.from_url('redis://redis:6379', decode_responses=True)
+r = redis.Redis(host='redis', port=6379, decode_responses=True)
 pydantic.json.ENCODERS_BY_TYPE[ObjectId] = str
 router = APIRouter(
     prefix="/products",

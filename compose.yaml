@@ -13,6 +13,9 @@ services:
             - ecom
         depends_on:
             - redis
+            - mongo
+        volumes:
+            - mongodata:/data/db
    mongo:
         image: mongo
         ports:
@@ -22,3 +25,5 @@ services:
 
 networks:
   ecom:
+volumes:
+  mongodata:
